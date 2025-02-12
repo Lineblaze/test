@@ -20,7 +20,7 @@ func (s *Server) MapHandlers(app *fiber.App, logger *logger.ApiLogger) error {
 		logger.Fatalf("failed to initialize PostgreSQL DB: %v", err)
 	}
 
-	jwtService := jwt.NewJWTService(s.cfg, logger)
+	jwtService := jwt.NewJWTService(s.cfg)
 
 	authRepo := repository.NewAuth(db)
 	authService := service.NewAuth(authRepo, jwtService)

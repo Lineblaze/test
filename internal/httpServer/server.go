@@ -8,7 +8,6 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-// Server struct
 type Server struct {
 	fiber     *fiber.App
 	cfg       *config.Config

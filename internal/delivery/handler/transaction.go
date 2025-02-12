@@ -3,15 +3,14 @@ package handler
 import (
 	"avito_test/internal/domain"
 	"github.com/gofiber/fiber/v3"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
 type TransactionService interface {
-	Buy(ctx context.Context, userID uuid.UUID, itemType string) error
-	Send(ctx context.Context, userID uuid.UUID, req domain.SendCoinRequest) error
-	Info(ctx context.Context, userID uuid.UUID) (*domain.InfoResponse, error)
+	Buy(ctx context.Context, userIDStr string, itemType string) error
+	Send(ctx context.Context, userIDStr string, req domain.SendCoinRequest) error
+	Info(ctx context.Context, userIDStr string) (*domain.InfoResponse, error)
 }
 
 type Transaction struct {
@@ -31,17 +30,9 @@ func (t Transaction) Buy() fiber.Handler {
 			return ctx.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Errors: "invalid user ID format"})
 		}
 
-		userID, err := uuid.Parse(userIDStr)
-		if err != nil {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Errors: "invalid UUID"})
-		}
-
 		itemType := ctx.Params("item")
-		if itemType == "" {
-			return ctx.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Errors: "item type is required"})
-		}
 
-		err = t.service.Buy(ctx.Context(), userID, itemType)
+		err := t.service.Buy(ctx.Context(), userIDStr, itemType)
 		switch {
 		case errors.Is(err, domain.ErrInvalidCredentials):
 			return ctx.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Errors: "invalid credentials"})
@@ -62,17 +53,12 @@ func (t Transaction) Send() fiber.Handler {
 			return ctx.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Errors: "invalid user ID format"})
 		}
 
-		userID, err := uuid.Parse(userIDStr)
-		if err != nil {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Errors: "invalid UUID"})
-		}
-
 		var req domain.SendCoinRequest
-		if err = ctx.Bind().Body(&req); err != nil {
+		if err := ctx.Bind().Body(&req); err != nil {
 			return ctx.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Errors: "invalid request body"})
 		}
 
-		err = t.service.Send(ctx.Context(), userID, req)
+		err := t.service.Send(ctx.Context(), userIDStr, req)
 		switch {
 		case errors.Is(err, domain.ErrInvalidCredentials):
 			return ctx.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Errors: "invalid credentials"})
@@ -93,12 +79,7 @@ func (t Transaction) Info() fiber.Handler {
 			return ctx.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Errors: "invalid user ID format"})
 		}
 
-		userID, err := uuid.Parse(userIDStr)
-		if err != nil {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Errors: "invalid UUID"})
-		}
-
-		info, err := t.service.Info(ctx.Context(), userID)
+		info, err := t.service.Info(ctx.Context(), userIDStr)
 		switch {
 		case errors.Is(err, domain.ErrInvalidCredentials):
 			return ctx.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Errors: "invalid credentials"})

@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"regexp"
 )
 
 type TransactionRepository interface {
@@ -24,7 +25,17 @@ func NewTransaction(repo TransactionRepository) Transaction {
 	}
 }
 
-func (t Transaction) Buy(ctx context.Context, userID uuid.UUID, itemType string) error {
+func (t Transaction) Buy(ctx context.Context, userIDStr string, itemType string) error {
+	if !validateUUID(userIDStr) {
+		return domain.ErrInvalidCredentials
+	}
+
+	if !validateItemType(itemType) {
+		return domain.ErrInvalidCredentials
+	}
+
+	userID, _ := uuid.Parse(userIDStr)
+
 	err := t.repo.BuyItem(ctx, userID, itemType)
 	if err != nil {
 		return errors.Wrap(err, "failed to buy item")
@@ -33,7 +44,13 @@ func (t Transaction) Buy(ctx context.Context, userID uuid.UUID, itemType string)
 	return nil
 }
 
-func (t Transaction) Send(ctx context.Context, userID uuid.UUID, req domain.SendCoinRequest) error {
+func (t Transaction) Send(ctx context.Context, userIDStr string, req domain.SendCoinRequest) error {
+	if !validateUUID(userIDStr) {
+		return domain.ErrInvalidCredentials
+	}
+
+	userID, _ := uuid.Parse(userIDStr)
+
 	entitySendCoin := entity.SendCoin{
 		ToUser: req.ToUser,
 		Amount: req.Amount,
@@ -47,7 +64,13 @@ func (t Transaction) Send(ctx context.Context, userID uuid.UUID, req domain.Send
 	return nil
 }
 
-func (t Transaction) Info(ctx context.Context, userID uuid.UUID) (*domain.InfoResponse, error) {
+func (t Transaction) Info(ctx context.Context, userIDStr string) (*domain.InfoResponse, error) {
+	if !validateUUID(userIDStr) {
+		return nil, domain.ErrInvalidCredentials
+	}
+
+	userID, _ := uuid.Parse(userIDStr)
+
 	info, err := t.repo.GetInfo(ctx, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get user info")
@@ -88,4 +111,14 @@ func (t Transaction) Info(ctx context.Context, userID uuid.UUID) (*domain.InfoRe
 	}
 
 	return &res, nil
+}
+
+func validateUUID(userIDStr string) bool {
+	_, err := uuid.Parse(userIDStr)
+	return err == nil
+}
+
+func validateItemType(itemType string) bool {
+	re := regexp.MustCompile(`^[a-zA-Z0-9_-]{1,32}$`)
+	return re.MatchString(itemType)
 }

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -31,6 +32,16 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
+	requiredEnvVars := []string{
+		"POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB",
+		"SERVER_PORT", "JWT_SECRET_KEY",
+	}
+	for _, env := range requiredEnvVars {
+		if os.Getenv(env) == "" {
+			return nil, fmt.Errorf("%s is not set in the environment", env)
+		}
+	}
+
 	cfg := &Config{
 		ServiceName: "Avito Test",
 		Postgres: struct {

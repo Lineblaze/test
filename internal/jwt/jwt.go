@@ -21,10 +21,9 @@ type Claims struct {
 	Username string `json:"username"`
 }
 
-func NewJWTService(cfg *config.Config, log *logger.ApiLogger) *Service {
+func NewJWTService(cfg *config.Config) *Service {
 	return &Service{
 		config: cfg,
-		logger: log,
 	}
 }
 
@@ -37,7 +36,6 @@ func (s *Service) GenerateJWT(claims Claims) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(s.config.Auth.Secret))
 	if err != nil {
-		s.logger.Errorf("error generating JWT token: %v", err)
 		return "", errors.WithMessage(err, "failed to sign JWT token")
 	}
 
