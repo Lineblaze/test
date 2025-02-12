@@ -1,0 +1,51 @@
+run:
+  allow-parallel-runners: true
+issues:
+  exclude-rules:
+    - path: controller #достаточное кол-во контекса на уровне контроллеров
+      linters:
+        - wrapcheck
+    - path: transaction #транзакции прозрачны
+      linters:
+        - wrapcheck
+linters:
+  enable-all: true
+  disable:
+    - goimports
+    - wsl
+    - varnamelen
+    - exhaustruct
+    - contextcheck
+    - gci
+    - gofumpt
+    - nolintlint
+    - nlreturn
+    - godot
+    - godox
+    - depguard
+    - dupword
+    - tagalign
+    - musttag
+    - perfsprint
+    - exportloopref
+linters-settings:
+  funlen:
+    lines: 80
+  lll:
+    line-length: 150
+  cyclop:
+    max-complexity: 15
+  revive:
+    rules:
+      - name: var-naming
+        disabled: true
+  stylecheck:
+    checks:
+      - "-ST1000"
+      - "-ST1016"
+      - "-ST1020"
+      - "-ST1021"
+      - "-ST1022"
+  testifylint:
+    disable:
+      - compares
