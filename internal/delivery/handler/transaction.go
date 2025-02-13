@@ -23,6 +23,18 @@ func NewTransaction(service TransactionService) Transaction {
 	}
 }
 
+// Buy
+// @Tags transactions
+// @Summary Покупка предмета
+// @Description Совершение покупки предмета пользователем
+// @Accept json
+// @Produce json
+// @Param item path string true "Тип предмета"
+// @Success 200 "Успешная покупка"
+// @Failure 400 {object} domain.ErrorResponse "Некорректные учетные данные"
+// @Failure 401 {object} domain.ErrorResponse "Неавторизованный доступ"
+// @Failure 500 {object} domain.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /transactions/buy/{item} [GET]
 func (t Transaction) Buy() fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 		userIDStr, ok := ctx.Locals("id").(string)
@@ -46,6 +58,18 @@ func (t Transaction) Buy() fiber.Handler {
 	}
 }
 
+// Send
+// @Tags transactions
+// @Summary Отправка монет
+// @Description Отправка монет другому пользователю
+// @Accept json
+// @Produce json
+// @Param body body domain.SendCoinRequest true "Данные для перевода"
+// @Success 200 "Перевод успешно выполнен"
+// @Failure 400 {object} domain.ErrorResponse "Некорректные учетные данные или тело запроса"
+// @Failure 401 {object} domain.ErrorResponse "Неавторизованный доступ"
+// @Failure 500 {object} domain.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /transactions/send [POST]
 func (t Transaction) Send() fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 		userIDStr, ok := ctx.Locals("id").(string)
@@ -72,6 +96,17 @@ func (t Transaction) Send() fiber.Handler {
 	}
 }
 
+// Info
+// @Tags transactions
+// @Summary Информация о транзакциях
+// @Description Получение информации о транзакциях пользователя
+// @Accept json
+// @Produce json
+// @Success 200 {object} domain.InfoResponse "Информация о транзакциях"
+// @Failure 400 {object} domain.ErrorResponse "Некорректные учетные данные"
+// @Failure 401 {object} domain.ErrorResponse "Неавторизованный доступ"
+// @Failure 500 {object} domain.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /transactions/info [GET]
 func (t Transaction) Info() fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 		userIDStr, ok := ctx.Locals("id").(string)

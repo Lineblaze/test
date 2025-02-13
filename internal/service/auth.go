@@ -6,7 +6,6 @@ import (
 	"avito_test/internal/jwt"
 	"context"
 	"github.com/pkg/errors"
-	"regexp"
 )
 
 type AuthRepository interface {
@@ -26,10 +25,6 @@ func NewAuth(repo AuthRepository, jwtService *jwt.Service) Auth {
 }
 
 func (a Auth) Auth(ctx context.Context, req domain.AuthRequest) (*domain.AuthResponse, error) {
-	if !validateUsername(req.Username) || !validatePassword(req.Password) {
-		return nil, domain.ErrInvalidCredentials
-	}
-
 	entityAuth := entity.Auth{
 		Username: req.Username,
 		Password: req.Password,
@@ -53,16 +48,4 @@ func (a Auth) Auth(ctx context.Context, req domain.AuthRequest) (*domain.AuthRes
 	}
 
 	return &res, nil
-}
-
-func validateUsername(username string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9._-]{3,32}$`)
-	return re.MatchString(username)
-}
-
-func validatePassword(password string) bool {
-	re := regexp.MustCompile(`^[A-Za-z\d!@#$%^&*()\-_+=]{8,}$`)
-	hasLetter := regexp.MustCompile(`[A-Za-z]`).MatchString(password)
-	hasDigit := regexp.MustCompile(`\d`).MatchString(password)
-	return re.MatchString(password) && hasLetter && hasDigit
 }
